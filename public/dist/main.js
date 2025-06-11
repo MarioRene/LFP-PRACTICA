@@ -112,16 +112,13 @@ class PokemonLexerApp {
 }`;
     }
     setupEventListeners() {
-        // Botones principales
         document.getElementById('analyzeBtn')?.addEventListener('click', () => this.analyzeCode());
         document.getElementById('clearEditor')?.addEventListener('click', () => this.clearEditor());
         document.getElementById('loadFile')?.addEventListener('click', () => this.loadFile());
         document.getElementById('saveFile')?.addEventListener('click', () => this.saveFile());
-        // Botones de reportes
         document.getElementById('tokenReport')?.addEventListener('click', () => this.showTokenReport());
         document.getElementById('errorReport')?.addEventListener('click', () => this.showErrorReport());
         document.getElementById('teamReport')?.addEventListener('click', () => this.showTeamReport());
-        // Tab switching
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const tabName = tab.dataset.tab;
@@ -129,7 +126,6 @@ class PokemonLexerApp {
                     this.switchTab(tabName);
             });
         });
-        // File input
         document.getElementById('file-input')?.addEventListener('change', (e) => this.handleFileLoad(e));
     }
     async analyzeCode() {
@@ -404,7 +400,6 @@ class PokemonLexerApp {
                         </h3>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
                 `;
-                // Import PokeAPIService dynamically
                 const { PokeAPIService } = await import('./api/PokeAPI.js');
                 console.log(`🔄 Fetching sprites for ${player.name}: ${team.map(p => p.name).join(', ')}`);
                 const pokemonNames = team.map(p => p.name);
@@ -509,8 +504,6 @@ class PokemonLexerApp {
         return div.innerHTML;
     }
 }
-// Inicializar aplicación cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     new PokemonLexerApp();
 });
-//# sourceMappingURL=main.js.map

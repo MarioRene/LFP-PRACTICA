@@ -13,4 +13,3 @@ export class Pokemon {
         return `${this.name} [${this.type}] - IV: ${this.calculateIV().toFixed(2)}%`;
     }
 }
-//# sourceMappingURL=Pokemon.js.map

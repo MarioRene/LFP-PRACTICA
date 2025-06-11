@@ -2,27 +2,42 @@
   "name": "pokemon-lexer",
   "version": "1.0.0",
   "description": "Analizador léxico para archivos de equipos Pokémon",
-  "main": "server.js",
+  "main": "dist/server.js",
+  "type": "module",
   "scripts": {
     "build": "tsc",
+    "build:client": "tsc --project tsconfig.client.json",
+    "build:server": "tsc --project tsconfig.server.json",
+    "build:all": "npm run build:client && npm run build:server",
     "watch": "tsc -w",
-    "start": "npm run build && node server.js",
-    "dev": "concurrently \"npm run watch\" \"npm run start\"",
-    "serve": "npm run build && node server.js",
-    "clean": "rimraf public/dist",
-    "test": "npm run build && node server.js --port 3000"
+    "watch:client": "tsc -w --project tsconfig.client.json",
+    "watch:server": "tsc -w --project tsconfig.server.json",
+    "start": "npm run build:all && node dist/server.js",
+    "start:js": "npm run build:client && node server.js",
+    "dev": "concurrently \"npm run watch:client\" \"npm run watch:server\" \"nodemon dist/server.js\"",
+    "dev:js": "concurrently \"npm run watch:client\" \"nodemon server.js\"",
+    "serve": "npm run build:all && node dist/server.js",
+    "clean": "rimraf public/dist dist",
+    "test": "npm run build:all && node dist/server.js --port 3000"
   },
   "keywords": ["lexer", "pokemon", "typescript", "compiler", "nodejs"],
   "author": "MarioMerida",
   "license": "MIT",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
     "@types/node": "^20.0.0",
+    "@types/express": "^4.17.17",
+    "@types/cors": "^2.8.13",
     "concurrently": "^8.2.0",
-    "rimraf": "^5.0.0"
+    "rimraf": "^5.0.0",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
 }

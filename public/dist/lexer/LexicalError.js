@@ -9,4 +9,3 @@ export class LexicalError {
         return `Error léxico en línea ${this.line}, columna ${this.column}: '${this.character}' - ${this.description}`;
     }
 }
-//# sourceMappingURL=LexicalError.js.map

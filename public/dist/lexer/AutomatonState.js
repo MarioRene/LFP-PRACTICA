@@ -8,7 +8,7 @@ export var AutomatonState;
     AutomatonState["S5"] = "S5";
     AutomatonState["S6"] = "S6";
     AutomatonState["S7"] = "S7";
-    AutomatonState["ERROR"] = "ERROR"; // Estado de error
+    AutomatonState["ERROR"] = "ERROR";
 })(AutomatonState || (AutomatonState = {}));
 export class AutomatonTransition {
     static getNextState(currentState, character) {
@@ -25,14 +25,14 @@ export class AutomatonTransition {
                 if (character === ':')
                     return AutomatonState.S7;
                 if (this.isSymbol(character))
-                    return AutomatonState.S0; // Retorna símbolos directamente
+                    return AutomatonState.S0;
                 if (this.isWhitespace(character))
                     return AutomatonState.S0;
                 return AutomatonState.ERROR;
             case AutomatonState.S1:
                 if (this.isAlphaNumeric(character) || character === '-')
                     return AutomatonState.S1;
-                return AutomatonState.S0; // Finaliza identificador, retrocede
+                return AutomatonState.S0;
             case AutomatonState.S2:
                 if (character === '"')
                     return AutomatonState.S5;
@@ -42,7 +42,7 @@ export class AutomatonTransition {
             case AutomatonState.S3:
                 if (this.isDigit(character))
                     return AutomatonState.S3;
-                return AutomatonState.S0; // Finaliza número, retrocede
+                return AutomatonState.S0;
             case AutomatonState.S4:
                 if (this.isLetter(character))
                     return AutomatonState.S4;
@@ -50,12 +50,12 @@ export class AutomatonTransition {
                     return AutomatonState.S6;
                 return AutomatonState.ERROR;
             case AutomatonState.S5:
-                return AutomatonState.S0; // Cadena completada
+                return AutomatonState.S0;
             case AutomatonState.S6:
-                return AutomatonState.S0; // Tipo completado
+                return AutomatonState.S0;
             case AutomatonState.S7:
                 if (character === '=')
-                    return AutomatonState.S0; // := completado
+                    return AutomatonState.S0;
                 return AutomatonState.ERROR;
             default:
                 return AutomatonState.ERROR;
@@ -86,4 +86,3 @@ export class AutomatonTransition {
         return '{}[]();:='.includes(char);
     }
 }
-//# sourceMappingURL=AutomatonState.js.map

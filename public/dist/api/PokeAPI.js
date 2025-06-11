@@ -1,9 +1,7 @@
 export class PokeAPIService {
     static async getPokemonSprite(pokemonName) {
         try {
-            // Normalización especial para nombres de Pokémon
             let normalizedName = pokemonName.toLowerCase().trim();
-            // Mapeo de nombres especiales
             const nameMapping = {
                 'nidoran♀': 'nidoran-f',
                 'nidoran♂': 'nidoran-m',
@@ -37,15 +35,14 @@ export class PokeAPIService {
                 'victreebel': 'victreebel',
                 'flareon': 'flareon'
             };
-            // Usar mapeo si existe, sino normalizar
             if (nameMapping[normalizedName]) {
                 normalizedName = nameMapping[normalizedName];
             }
             else {
                 normalizedName = normalizedName
-                    .replace(/[^a-z0-9\-]/g, '-') // Replace special chars with hyphens
-                    .replace(/-+/g, '-') // Replace multiple hyphens with single
-                    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+                    .replace(/[^a-z0-9\-]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
             }
             console.log(`🔍 Fetching sprite for: "${pokemonName}" -> "${normalizedName}"`);
             const url = `https://pokeapi.co/api/v2/pokemon/${normalizedName}`;
@@ -55,18 +52,14 @@ export class PokeAPIService {
                 return this.getDefaultSprite();
             }
             const data = await response.json();
-            // Priorizar sprites en este orden
             let sprite = null;
             if (data.sprites) {
-                // 1. Official artwork (mejor calidad)
                 if (data.sprites.other && data.sprites.other['official-artwork'] && data.sprites.other['official-artwork'].front_default) {
                     sprite = data.sprites.other['official-artwork'].front_default;
                 }
-                // 2. Sprite por defecto
                 else if (data.sprites.front_default) {
                     sprite = data.sprites.front_default;
                 }
-                // 3. Otros sprites disponibles
                 else if (data.sprites.other && data.sprites.other['home'] && data.sprites.other['home'].front_default) {
                     sprite = data.sprites.other['home'].front_default;
                 }
@@ -88,12 +81,10 @@ export class PokeAPIService {
     static async getPokemonSprites(pokemonNames) {
         console.log(`🎯 Fetching sprites for ${pokemonNames.length} Pokemon:`, pokemonNames);
         const results = [];
-        // Procesar uno por uno para mejor debugging y evitar rate limiting
         for (const name of pokemonNames) {
             try {
                 const sprite = await this.getPokemonSprite(name);
                 results.push({ name, sprite });
-                // Pequeña pausa para evitar rate limiting
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
             catch (error) {
@@ -105,10 +96,8 @@ export class PokeAPIService {
         return results;
     }
     static getDefaultSprite() {
-        // SVG mejorado como fallback
         return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI2Y4ZjRmZiIgc3Ryb2tlPSIjOWI1OWI2IiBzdHJva2Utd2lkdGg9IjMiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIzNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZThkNWYyIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSI1MCIgeT0iNTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIzMCIgZmlsbD0iIzliNTliNiI+8J+StzwvdGV4dD4KPC9zdmc+';
     }
-    // Método para pre-cargar sprites (opcional)
     static async preloadSprite(url) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -118,4 +107,3 @@ export class PokeAPIService {
         });
     }
 }
-//# sourceMappingURL=PokeAPI.js.map

@@ -1,17 +1,13 @@
 export class SyntaxHighlighter {
     static highlightSyntax(code) {
         let highlighted = code;
-        // Highlight reserved words (blue)
         Object.keys(this.TOKEN_COLORS).forEach(word => {
             const regex = new RegExp(`\\b${word}\\b`, 'gi');
             const color = this.TOKEN_COLORS[word] || '#2196f3';
             highlighted = highlighted.replace(regex, `<span style="color: ${color}; font-weight: bold;">$&</span>`);
         });
-        // Highlight strings (orange)
         highlighted = highlighted.replace(/"[^"]*"/g, '<span style="color: #ff9800;">$&</span>');
-        // Highlight numbers (purple)
         highlighted = highlighted.replace(/\b\d+\b/g, '<span style="color: #9c27b0;">$&</span>');
-        // Preserve line breaks
         highlighted = highlighted.replace(/\n/g, '<br>');
         return highlighted;
     }
@@ -55,7 +51,6 @@ export class Editor {
                 this.insertTab();
             }
         });
-        // Initial highlight
         updateHighlight();
     }
     synchronizeScroll() {
@@ -88,4 +83,3 @@ export class Editor {
         this.setValue('');
     }
 }
-//# sourceMappingURL=Editor.js.map

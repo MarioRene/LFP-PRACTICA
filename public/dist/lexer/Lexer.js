@@ -15,23 +15,27 @@ export class Lexer {
         this.position = 0;
         this.line = 1;
         this.column = 1;
+        console.log('🔍 Starting lexical analysis...');
         while (this.position < this.input.length) {
             this.scanToken();
         }
-        // Agregar token EOF
         this.tokens.push(new Token(TokenType.EOF, '', this.line, this.column));
+        console.log(`✅ Lexical analysis completed. Tokens: ${this.tokens.length}, Errors: ${this.errors.length}`);
+        const importantTokens = this.tokens.filter(t => t.type === TokenType.SALUD ||
+            t.type === TokenType.ATAQUE ||
+            t.type === TokenType.DEFENSA ||
+            t.type === TokenType.NUMERO);
+        console.log('🎯 Important tokens found:', importantTokens.map(t => `${t.lexeme}(${t.type})`));
         return { tokens: this.tokens, errors: this.errors };
     }
     scanToken() {
         const startLine = this.line;
         const startColumn = this.column;
         const char = this.getCurrentChar();
-        // Skip whitespace
         if (this.isWhitespace(char)) {
             this.skipWhitespace();
             return;
         }
-        // Single character tokens
         switch (char) {
             case '{':
                 this.addToken(TokenType.LLAVE_ABRE, char, startLine, startColumn);
@@ -77,27 +81,23 @@ export class Lexer {
                 }
                 return;
         }
-        // String literals
         if (char === '"') {
             this.scanString(startLine, startColumn);
             return;
         }
-        // Numbers
         if (this.isDigit(char)) {
             this.scanNumber(startLine, startColumn);
             return;
         }
-        // Identifiers and reserved words
         if (this.isLetter(char)) {
             this.scanIdentifier(startLine, startColumn);
             return;
         }
-        // Unknown character
         this.addError(char, this.line, this.column);
         this.advance();
     }
     scanString(startLine, startColumn) {
-        this.advance(); // consume opening quote
+        this.advance();
         let value = '"';
         while (this.position < this.input.length && this.getCurrentChar() !== '"') {
             if (this.getCurrentChar() === '\n' || this.getCurrentChar() === '\r') {
@@ -114,6 +114,7 @@ export class Lexer {
         value += this.getCurrentChar();
         this.advance();
         this.addToken(TokenType.CADENA_TEXTO, value, startLine, startColumn);
+        console.log(`📝 String token: "${value}"`);
     }
     scanNumber(startLine, startColumn) {
         let value = '';
@@ -122,6 +123,7 @@ export class Lexer {
             this.advance();
         }
         this.addToken(TokenType.NUMERO, value, startLine, startColumn);
+        console.log(`🔢 Number token: ${value}`);
     }
     scanIdentifier(startLine, startColumn) {
         let value = '';
@@ -133,9 +135,11 @@ export class Lexer {
         const tokenType = RESERVED_WORDS.get(value);
         if (tokenType) {
             this.addToken(tokenType, value, startLine, startColumn);
+            console.log(`🎯 Reserved word: "${value}" -> ${tokenType}`);
         }
         else {
             this.addToken(TokenType.CADENA_TEXTO, value, startLine, startColumn);
+            console.log(`📄 Identifier: "${value}"`);
         }
     }
     skipWhitespace() {
@@ -186,4 +190,3 @@ export class Lexer {
         this.errors.push(new LexicalError(character, line, column, description));
     }
 }
-//# sourceMappingURL=Lexer.js.map

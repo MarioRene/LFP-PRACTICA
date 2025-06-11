@@ -37,17 +37,31 @@ export enum TokenType {
 }
 
 export const RESERVED_WORDS = new Map<string, TokenType>([
+    // Palabra clave principal
     ['Jugador', TokenType.JUGADOR],
+    
+    // Estadísticas (exactamente como aparecen en el código)
     ['salud', TokenType.SALUD],
     ['ataque', TokenType.ATAQUE],
     ['defensa', TokenType.DEFENSA],
+    
+    // Tipos de Pokémon (todos en minúsculas para el ejemplo del PDF)
     ['agua', TokenType.AGUA],
     ['fuego', TokenType.FUEGO],
     ['planta', TokenType.PLANTA],
     ['normal', TokenType.NORMAL],
     ['psiquico', TokenType.PSIQUICO],
     ['dragon', TokenType.DRAGON],
-    ['bicho', TokenType.BICHO]
+    ['bicho', TokenType.BICHO],
+    
+    // También admitir tipos con primera letra mayúscula por compatibilidad
+    ['Agua', TokenType.AGUA],
+    ['Fuego', TokenType.FUEGO],
+    ['Planta', TokenType.PLANTA],
+    ['Normal', TokenType.NORMAL],
+    ['Psiquico', TokenType.PSIQUICO],
+    ['Dragon', TokenType.DRAGON],
+    ['Bicho', TokenType.BICHO]
 ]);
 
 export class Token {
@@ -65,5 +79,36 @@ export class Token {
 
     public toString(): string {
         return `Token(${this.type}, "${this.lexeme}", ${this.line}:${this.column})`;
+    }
+
+    // Método helper para debug
+    public isReservedWord(): boolean {
+        return this.type === TokenType.JUGADOR || 
+               this.type === TokenType.SALUD ||
+               this.type === TokenType.ATAQUE ||
+               this.type === TokenType.DEFENSA ||
+               this.type === TokenType.AGUA ||
+               this.type === TokenType.FUEGO ||
+               this.type === TokenType.PLANTA ||
+               this.type === TokenType.NORMAL ||
+               this.type === TokenType.PSIQUICO ||
+               this.type === TokenType.DRAGON ||
+               this.type === TokenType.BICHO;
+    }
+
+    public isStatToken(): boolean {
+        return this.type === TokenType.SALUD ||
+               this.type === TokenType.ATAQUE ||
+               this.type === TokenType.DEFENSA;
+    }
+
+    public isTypeToken(): boolean {
+        return this.type === TokenType.AGUA ||
+               this.type === TokenType.FUEGO ||
+               this.type === TokenType.PLANTA ||
+               this.type === TokenType.NORMAL ||
+               this.type === TokenType.PSIQUICO ||
+               this.type === TokenType.DRAGON ||
+               this.type === TokenType.BICHO;
     }
 }

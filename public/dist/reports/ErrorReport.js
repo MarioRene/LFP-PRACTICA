@@ -173,4 +173,3 @@ export class ErrorReport {
         return div.innerHTML;
     }
 }
-//# sourceMappingURL=ErrorReport.js.map

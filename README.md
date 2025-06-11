@@ -117,3 +117,11 @@ Jugador: "NombreJugador" {
 - Los archivos deben tener extensión .pklfp
 - Se requiere conexión a internet para sprites de PokeAPI
 - Compatible con navegadores modernos (ES2020+)
+
+npm run build:client    # Compila solo cliente
+npm run build:server    # Compila solo servidor  
+
+
+npm run build:all       # Compila cliente + servidor
+npm start               # Compila todo + ejecuta dist/server.js
+npm run dev             # Modo desarrollo con watch

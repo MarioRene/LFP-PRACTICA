@@ -25,12 +25,25 @@ export class Lexer {
         this.line = 1;
         this.column = 1;
 
+        console.log('🔍 Starting lexical analysis...');
+
         while (this.position < this.input.length) {
             this.scanToken();
         }
 
         // Agregar token EOF
         this.tokens.push(new Token(TokenType.EOF, '', this.line, this.column));
+
+        console.log(`✅ Lexical analysis completed. Tokens: ${this.tokens.length}, Errors: ${this.errors.length}`);
+        
+        // Debug: mostrar algunos tokens importantes
+        const importantTokens = this.tokens.filter(t => 
+            t.type === TokenType.SALUD || 
+            t.type === TokenType.ATAQUE || 
+            t.type === TokenType.DEFENSA ||
+            t.type === TokenType.NUMERO
+        );
+        console.log('🎯 Important tokens found:', importantTokens.map(t => `${t.lexeme}(${t.type})`));
 
         return { tokens: this.tokens, errors: this.errors };
     }
@@ -137,6 +150,7 @@ export class Lexer {
         this.advance();
 
         this.addToken(TokenType.CADENA_TEXTO, value, startLine, startColumn);
+        console.log(`📝 String token: "${value}"`);
     }
 
     private scanNumber(startLine: number, startColumn: number): void {
@@ -148,6 +162,7 @@ export class Lexer {
         }
 
         this.addToken(TokenType.NUMERO, value, startLine, startColumn);
+        console.log(`🔢 Number token: ${value}`);
     }
 
     private scanIdentifier(startLine: number, startColumn: number): void {
@@ -159,11 +174,14 @@ export class Lexer {
             this.advance();
         }
 
+        // Verificar si es palabra reservada
         const tokenType = RESERVED_WORDS.get(value);
         if (tokenType) {
             this.addToken(tokenType, value, startLine, startColumn);
+            console.log(`🎯 Reserved word: "${value}" -> ${tokenType}`);
         } else {
             this.addToken(TokenType.CADENA_TEXTO, value, startLine, startColumn);
+            console.log(`📄 Identifier: "${value}"`);
         }
     }
 

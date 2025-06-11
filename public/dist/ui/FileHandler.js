@@ -39,4 +39,3 @@ export class FileHandler {
         URL.revokeObjectURL(url);
     }
 }
-//# sourceMappingURL=FileHandler.js.map

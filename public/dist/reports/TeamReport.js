@@ -435,7 +435,6 @@ export class TeamReport {
             </div>
         </div>
         <div class="pokemon-grid">`;
-            // Get sprites for all pokemon in the team
             const pokemonNames = team.map(p => p.name);
             const sprites = await PokeAPIService.getPokemonSprites(pokemonNames);
             team.forEach((pokemon, index) => {
@@ -503,4 +502,3 @@ export class TeamReport {
         return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDAiIGZpbGw9IiNmOGY0ZmYiIHN0cm9rZT0iIzliNTliNiIgc3Ryb2tlLXdpZHRoPSIzIi8+IDx0ZXh0IHg9IjUwIiB5PSI1NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOWI1OWI2Ij7wn5KXPC90ZXh0Pjwvc3ZnPg==';
     }
 }
-//# sourceMappingURL=TeamReport.js.map

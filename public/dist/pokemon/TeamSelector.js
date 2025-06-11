@@ -1,4 +1,4 @@
-import { Token, TokenType } from '../lexer/Token.js';
+import { TokenType } from '../lexer/Token.js';
 import { Player } from './Player.js';
 import { Pokemon } from './Pokemon.js';
 export class TeamSelector {
@@ -8,6 +8,7 @@ export class TeamSelector {
             token.type !== TokenType.NEWLINE &&
             token.type !== TokenType.EOF);
         this.position = 0;
+        console.log('🎯 TeamSelector initialized with tokens:', this.tokens.length);
     }
     parsePlayersAndPokemons() {
         const players = [];
@@ -16,192 +17,217 @@ export class TeamSelector {
             try {
                 const player = this.parsePlayer();
                 if (player) {
+                    console.log(`✅ Player parsed: ${player.name} with ${player.pokemons.length} Pokemon`);
                     players.push(player);
                 }
             }
             catch (error) {
-                console.warn('Error parsing player:', error);
+                console.warn('❌ Error parsing player:', error);
                 this.skipToNextPlayer();
             }
         }
         return players;
     }
     parsePlayer() {
-        if (!this.match(TokenType.JUGADOR)) {
-            this.skipToNextPlayer();
+        if (!this.consumeToken(TokenType.JUGADOR))
             return null;
-        }
-        if (!this.match(TokenType.DOS_PUNTOS)) {
-            this.skipToNextPlayer();
+        if (!this.consumeToken(TokenType.DOS_PUNTOS))
             return null;
-        }
-        if (!this.check(TokenType.CADENA_TEXTO)) {
-            this.skipToNextPlayer();
+        const nameToken = this.consumeToken(TokenType.CADENA_TEXTO);
+        if (!nameToken)
             return null;
-        }
-        let playerName = this.advance().lexeme;
+        let playerName = nameToken.lexeme;
         if (playerName.startsWith('"') && playerName.endsWith('"')) {
             playerName = playerName.slice(1, -1);
         }
-        if (!this.match(TokenType.LLAVE_ABRE)) {
-            this.skipToNextPlayer();
+        if (!this.consumeToken(TokenType.LLAVE_ABRE))
             return null;
-        }
         const player = new Player(playerName);
-        while (!this.check(TokenType.LLAVE_CIERRA) && !this.isAtEnd()) {
+        console.log(`🔄 Parsing player: ${playerName}`);
+        while (!this.checkToken(TokenType.LLAVE_CIERRA) && !this.isAtEnd()) {
             const pokemon = this.parsePokemon();
             if (pokemon) {
+                console.log(`  ➕ Pokemon added: ${pokemon.name} [${pokemon.type}] - H:${pokemon.health} A:${pokemon.attack} D:${pokemon.defense}`);
                 player.addPokemon(pokemon);
             }
             else {
+                console.warn('⚠️  Failed to parse Pokemon, skipping...');
                 this.skipToNextPokemon();
             }
         }
-        if (!this.match(TokenType.LLAVE_CIERRA)) {
+        if (!this.consumeToken(TokenType.LLAVE_CIERRA))
             return null;
-        }
         return player;
     }
     parsePokemon() {
-        if (!this.check(TokenType.CADENA_TEXTO)) {
+        const nameToken = this.consumeToken(TokenType.CADENA_TEXTO);
+        if (!nameToken)
             return null;
-        }
-        let pokemonName = this.advance().lexeme;
+        let pokemonName = nameToken.lexeme;
         if (pokemonName.startsWith('"') && pokemonName.endsWith('"')) {
             pokemonName = pokemonName.slice(1, -1);
         }
-        if (!this.match(TokenType.CORCHETE_ABRE)) {
+        console.log(`🔍 Parsing Pokemon: ${pokemonName}`);
+        if (!this.consumeToken(TokenType.CORCHETE_ABRE))
             return null;
-        }
-        if (!this.isTypeToken(this.peek().type)) {
+        const typeToken = this.consumeTokenOfType('type');
+        if (!typeToken)
             return null;
-        }
-        const pokemonType = this.advance().lexeme;
-        if (!this.match(TokenType.CORCHETE_CIERRA)) {
+        const pokemonType = typeToken.lexeme;
+        if (!this.consumeToken(TokenType.CORCHETE_CIERRA))
             return null;
-        }
-        if (!this.match(TokenType.ASIGNACION)) {
+        if (!this.consumeToken(TokenType.ASIGNACION))
             return null;
-        }
-        if (!this.match(TokenType.PARENTESIS_ABRE)) {
+        if (!this.consumeToken(TokenType.PARENTESIS_ABRE))
             return null;
-        }
-        const stats = this.parseStats();
+        const stats = this.parseStatsBulletproof();
         if (!stats) {
+            console.warn('❌ Failed to parse stats for:', pokemonName);
             return null;
         }
-        if (!this.match(TokenType.PARENTESIS_CIERRA)) {
+        if (!this.consumeToken(TokenType.PARENTESIS_CIERRA))
             return null;
-        }
-        return new Pokemon(pokemonName, pokemonType, stats.health, stats.attack, stats.defense);
+        const pokemon = new Pokemon(pokemonName, pokemonType, stats.health, stats.attack, stats.defense);
+        console.log(`  📊 Pokemon created: ${pokemonName} - H:${stats.health} A:${stats.attack} D:${stats.defense} IV:${pokemon.calculateIV().toFixed(1)}%`);
+        return pokemon;
     }
-    parseStats() {
-        let health = 0, attack = 0, defense = 0;
-        let statsFound = 0;
-        while (statsFound < 3 && this.check(TokenType.CORCHETE_ABRE)) {
-            if (!this.match(TokenType.CORCHETE_ABRE)) {
+    parseStatsBulletproof() {
+        console.log('  🔢 Starting bulletproof stats parsing...');
+        const stats = {
+            health: 0,
+            attack: 0,
+            defense: 0
+        };
+        let statsCount = 0;
+        const maxStats = 3;
+        while (statsCount < maxStats && this.checkToken(TokenType.CORCHETE_ABRE)) {
+            console.log(`    📍 Parsing stat ${statsCount + 1}/${maxStats}`);
+            if (!this.consumeToken(TokenType.CORCHETE_ABRE)) {
+                console.warn('❌ Expected [');
                 break;
             }
-            if (!this.isStatToken(this.peek().type)) {
-                return null;
+            const statToken = this.getCurrentToken();
+            if (!statToken) {
+                console.warn('❌ No stat token found');
+                break;
             }
-            const statType = this.advance().type;
-            if (!this.match(TokenType.CORCHETE_CIERRA)) {
-                return null;
+            const statName = statToken.lexeme.toLowerCase();
+            console.log(`    📝 Stat name: "${statName}" (type: ${statToken.type})`);
+            if (!['salud', 'ataque', 'defensa'].includes(statName)) {
+                console.warn(`❌ Invalid stat name: "${statName}"`);
+                break;
             }
-            if (!this.match(TokenType.IGUAL)) {
-                return null;
+            this.advance();
+            if (!this.consumeToken(TokenType.CORCHETE_CIERRA)) {
+                console.warn('❌ Expected ]');
+                break;
             }
-            if (!this.check(TokenType.NUMERO)) {
-                return null;
+            if (!this.consumeToken(TokenType.IGUAL)) {
+                console.warn('❌ Expected =');
+                break;
             }
-            const value = parseInt(this.advance().lexeme);
-            if (!this.match(TokenType.PUNTO_COMA)) {
-                return null;
+            const valueToken = this.consumeToken(TokenType.NUMERO);
+            if (!valueToken) {
+                console.warn('❌ Expected number');
+                break;
             }
-            switch (statType) {
-                case TokenType.SALUD:
-                    health = value;
+            const value = parseInt(valueToken.lexeme);
+            console.log(`    🔢 Value: ${value}`);
+            if (!this.consumeToken(TokenType.PUNTO_COMA)) {
+                console.warn('❌ Expected ;');
+                break;
+            }
+            switch (statName) {
+                case 'salud':
+                    stats.health = value;
+                    console.log(`    💚 HEALTH assigned: ${value}`);
                     break;
-                case TokenType.ATAQUE:
-                    attack = value;
+                case 'ataque':
+                    stats.attack = value;
+                    console.log(`    ⚔️  ATTACK assigned: ${value}`);
                     break;
-                case TokenType.DEFENSA:
-                    defense = value;
+                case 'defensa':
+                    stats.defense = value;
+                    console.log(`    🛡️  DEFENSE assigned: ${value}`);
                     break;
                 default:
-                    return null;
+                    console.warn(`❌ Unknown stat: ${statName}`);
+                    break;
             }
-            statsFound++;
+            statsCount++;
+            console.log(`    ✅ Progress: ${statsCount}/${maxStats} - Current stats: H:${stats.health} A:${stats.attack} D:${stats.defense}`);
         }
-        if (statsFound !== 3) {
+        if (statsCount !== maxStats) {
+            console.warn(`❌ Expected ${maxStats} stats, got ${statsCount}`);
             return null;
         }
-        return { health, attack, defense };
-    }
-    isTypeToken(tokenType) {
-        return [
-            TokenType.AGUA,
-            TokenType.FUEGO,
-            TokenType.PLANTA,
-            TokenType.NORMAL,
-            TokenType.PSIQUICO,
-            TokenType.DRAGON,
-            TokenType.BICHO
-        ].includes(tokenType);
-    }
-    isStatToken(tokenType) {
-        return [
-            TokenType.SALUD,
-            TokenType.ATAQUE,
-            TokenType.DEFENSA
-        ].includes(tokenType);
-    }
-    match(expectedType) {
-        if (this.check(expectedType)) {
-            this.advance();
-            return true;
+        console.log(`  ✅ Final stats: Health=${stats.health}, Attack=${stats.attack}, Defense=${stats.defense}`);
+        if (stats.health === 0 || stats.attack === 0 || stats.defense === 0) {
+            console.error(`  🚨 CRITICAL ERROR: Some stats are 0! H:${stats.health} A:${stats.attack} D:${stats.defense}`);
         }
-        return false;
+        return stats;
     }
-    check(tokenType) {
+    consumeToken(expectedType) {
+        if (this.checkToken(expectedType)) {
+            return this.advance();
+        }
+        console.warn(`❌ Expected ${expectedType}, got ${this.getCurrentToken()?.type || 'EOF'}`);
+        return null;
+    }
+    consumeTokenOfType(category) {
+        const currentToken = this.getCurrentToken();
+        if (!currentToken)
+            return null;
+        if (category === 'type' && this.isTypeToken(currentToken.type)) {
+            return this.advance();
+        }
+        console.warn(`❌ Expected ${category} token, got ${currentToken.type}`);
+        return null;
+    }
+    checkToken(tokenType) {
+        const current = this.getCurrentToken();
+        return current ? current.type === tokenType : false;
+    }
+    getCurrentToken() {
         if (this.isAtEnd())
-            return false;
-        return this.peek().type === tokenType;
+            return null;
+        return this.tokens[this.position];
     }
     advance() {
+        const token = this.getCurrentToken();
         if (!this.isAtEnd())
             this.position++;
-        return this.previous();
+        return token;
     }
     isAtEnd() {
         return this.position >= this.tokens.length;
     }
-    peek() {
-        if (this.isAtEnd()) {
-            return new Token(TokenType.EOF, '', 0, 0);
-        }
-        return this.tokens[this.position];
-    }
-    previous() {
-        return this.tokens[this.position - 1];
+    isTypeToken(tokenType) {
+        const validTypes = [
+            TokenType.AGUA, TokenType.FUEGO, TokenType.PLANTA,
+            TokenType.NORMAL, TokenType.PSIQUICO, TokenType.DRAGON, TokenType.BICHO
+        ];
+        return validTypes.includes(tokenType);
     }
     skipToNextPlayer() {
-        while (!this.isAtEnd() && this.peek().type !== TokenType.JUGADOR) {
+        console.log('⏭️  Skipping to next player...');
+        while (!this.isAtEnd() && !this.checkToken(TokenType.JUGADOR)) {
             this.advance();
         }
     }
     skipToNextPokemon() {
+        console.log('⏭️  Skipping to next Pokemon...');
         let braceCount = 0;
         while (!this.isAtEnd()) {
-            const token = this.peek();
+            const token = this.getCurrentToken();
+            if (!token)
+                break;
             if (token.type === TokenType.LLAVE_ABRE) {
                 braceCount++;
             }
             else if (token.type === TokenType.LLAVE_CIERRA) {
-                if (braceCount === 0) {
+                if (braceCount === 0)
                     break;
-                }
                 braceCount--;
             }
             else if (token.type === TokenType.CADENA_TEXTO && braceCount === 0) {
@@ -211,4 +237,3 @@ export class TeamSelector {
         }
     }
 }
-//# sourceMappingURL=TeamSelector.js.map

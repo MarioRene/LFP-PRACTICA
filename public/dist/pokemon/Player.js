@@ -10,7 +10,6 @@ export class Player {
         const sortedPokemons = this.pokemons.sort((a, b) => b.calculateIV() - a.calculateIV());
         const selectedTeam = [];
         const usedTypes = new Set();
-        // Primero seleccionar por diversidad de tipos
         for (const pokemon of sortedPokemons) {
             if (selectedTeam.length >= 6)
                 break;
@@ -26,7 +25,6 @@ export class Player {
                 }
             }
         }
-        // Completar equipo si hay menos de 6
         if (selectedTeam.length < 6) {
             for (const pokemon of sortedPokemons) {
                 if (selectedTeam.length >= 6)
@@ -39,4 +37,3 @@ export class Player {
         return selectedTeam.slice(0, 6);
     }
 }
-//# sourceMappingURL=Player.js.map
